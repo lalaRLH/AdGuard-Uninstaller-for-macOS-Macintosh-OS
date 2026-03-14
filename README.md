@@ -6,7 +6,7 @@ A personal script written for my own use. Published here in case it saves someon
 
 **BY DOWNLOADING OR RUNNING THIS SCRIPT YOU AGREE TO THE FOLLOWING:**
 
-This script is provided "as is", without warranty of any kind, express or implied. The author accepts no responsibility or liability for any loss, damage, data loss, system damage or any other consequence — direct or indirect — arising from the use or misuse of this script. This includes but is not limited to damage to hardware, software, files or data.
+This script is provided "as is", without warranty of any kind, express or implied. The author accepts no responsibility or liability for any loss, damage, data loss, system damage or any other consequence, directly or indirectly, arising from the use or reuse and/or misuse of this script. This includes but is not limited to damage to hardware, software, files and/or data.
 
 This script executes with administrator privileges and removes files from your system. You are solely responsible for reviewing what it does before running it and for any outcome that results from running it. The author makes no representation that this script is suitable for any particular purpose, will work on your system, or will produce any specific result.
 
@@ -32,7 +32,7 @@ curl -fsSL https://raw.githubusercontent.com/lalaRLH/AdGuard-Uninstaller-for-mac
 
 ## What it does
 
-Removes AdGuard for Mac completely — the application, LaunchDaemons, network/system extension, all user data, preferences, caches, browser native messaging hosts and package receipts. Tested against v2.14.2, v2.17.0 and v2.18.0 on macOS Monterey and later.
+Removes AdGuard for Mac completely — the application, LaunchDaemons, network/system extension, all user data, preferences, caches, browser native messaging hosts and package receipts. Tested against v2.14.2, v2.17.0 and v2.18.0 on macOS Sonoma and later.
 
 No SIP changes required. If the network extension reports "waiting for user" after running, a reboot will complete its removal.
 
