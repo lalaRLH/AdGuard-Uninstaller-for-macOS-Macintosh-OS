@@ -5,7 +5,6 @@
 <br/>
 
 ![macOS](https://img.shields.io/badge/macOS-Monterey%2B-black?style=flat-square&logo=apple&logoColor=white)
-![Shell](https://img.shields.io/badge/Shell-Bash-informational?style=flat-square&logo=gnubash&logoColor=white&color=3a3a3c)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square&color=30d158)
 ![Version](https://img.shields.io/badge/Tested-v2.14%20·%20v2.17%20·%20v2.18-blue?style=flat-square&color=0a84ff)
 ![Support](https://img.shields.io/badge/Support-None-critical?style=flat-square&color=ff453a)
@@ -29,7 +28,7 @@ Shared publicly in case it saves someone else the time. Nothing more.
 
 <br/>
 
-### Option 1 &nbsp;·&nbsp; One-liner (recommended)
+### Within macOS terminal &nbsp;·&nbsp; One-liner (recommended)
 
 No download. No Gatekeeper warning. Paste into Terminal and go.
 
@@ -39,18 +38,13 @@ curl -fsSL https://raw.githubusercontent.com/lalaRLH/AdGuard-Uninstaller-for-mac
 
 <br/>
 
-### Option 2 &nbsp;·&nbsp; Double-click
+<div align="center">
 
-Download [`uninstall-adguard.command`](./uninstall-adguard.command), then:
+<img src="banner.svg" alt="AdGuard Uninstaller for macOS" width="100%"/>
 
-```bash
-# strip the quarantine flag first
-xattr -d com.apple.quarantine ~/Downloads/uninstall-adguard.command
+<br/>
 
-# then double-click it — macOS will prompt for your password
-```
-
-> If macOS still blocks it: right-click → **Open** → **Open**
+![Shell](https://img.shields.io/badge/Shell-Bash-informational?style=flat-square&logo=gnubash&logoColor=white&color=3a3a3c)
 
 <br/>
 
