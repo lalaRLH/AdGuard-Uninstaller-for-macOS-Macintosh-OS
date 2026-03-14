@@ -1,7 +1,3 @@
-<div align="center">
-
-<img src="banner.svg" alt="AdGuard Uninstaller for macOS" width="100%"/>
-
 <br/>
 
 ![macOS](https://img.shields.io/badge/macOS-Monterey%2B-black?style=flat-square&logo=apple&logoColor=white)
