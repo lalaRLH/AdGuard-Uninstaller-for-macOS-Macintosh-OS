@@ -1,43 +1,98 @@
-# AdGuard Uninstaller for macOS / Macintosh OS
+<div align="center">
 
-A personal script written for my own use. Published here in case it saves someone else the time it took me to put it together. That is the full extent of this repository.
+<img src="banner.svg" alt="AdGuard Uninstaller for macOS" width="100%"/>
+
+<br/>
+
+![macOS](https://img.shields.io/badge/macOS-Monterey%2B-black?style=flat-square&logo=apple&logoColor=white)
+![Shell](https://img.shields.io/badge/Shell-Bash-informational?style=flat-square&logo=gnubash&logoColor=white&color=3a3a3c)
+![License](https://img.shields.io/badge/License-MIT-green?style=flat-square&color=30d158)
+![Version](https://img.shields.io/badge/Tested-v2.14%20·%20v2.17%20·%20v2.18-blue?style=flat-square&color=0a84ff)
+![Support](https://img.shields.io/badge/Support-None-critical?style=flat-square&color=ff453a)
+
+<br/>
+
+**A personal script for fully removing AdGuard from macOS.**  
+Shared publicly in case it saves someone else the time. Nothing more.
+
+</div>
+
+---
 
 ## Disclaimer
 
-**BY DOWNLOADING OR RUNNING THIS SCRIPT YOU AGREE TO THE FOLLOWING:**
-
-This script is provided "as is", without warranty of any kind, express or implied. The author accepts no responsibility or liability for any loss, damage, data loss, system damage or any other consequence, directly or indirectly, arising from the use or reuse and/or misuse of this script. This includes but is not limited to damage to hardware, software, files and/or data.
-
-This script executes with administrator privileges and removes files from your system. You are solely responsible for reviewing what it does before running it and for any outcome that results from running it. The author makes no representation that this script is suitable for any particular purpose, will work on your system, or will produce any specific result.
-
-**Use entirely at your own risk.**
+> This script is provided **"as is"** without warranty of any kind. The author accepts no responsibility for data loss, system damage or any other consequence arising from its use. It runs with administrator privileges and removes files permanently. **Review it before running it. Use entirely at your own risk.**
 
 ---
 
 ## Usage
 
-Download `uninstall-adguard.command` and double-click it. macOS will prompt for your password.
+<br/>
 
-If macOS blocks the file on first run, right-click → Open → Open. Or strip the quarantine flag first:
+### Option 1 &nbsp;·&nbsp; One-liner (recommended)
 
-```bash
-xattr -d com.apple.quarantine uninstall-adguard.command
-```
-
-To run without downloading at all:
+No download. No Gatekeeper warning. Paste into Terminal and go.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/lalaRLH/AdGuard-Uninstaller-for-macOS-Macintosh-OS/main/uninstall-adguard.command | sudo bash
 ```
 
-## What it does
+<br/>
 
-Removes AdGuard for Mac completely — the application, LaunchDaemons, network/system extension, all user data, preferences, caches, browser native messaging hosts and package receipts. Tested against v2.14.2, v2.17.0 and v2.18.0 on macOS Sonoma and later.
+### Option 2 &nbsp;·&nbsp; Double-click
 
-No SIP changes required. If the network extension reports "waiting for user" after running, a reboot will complete its removal.
+Download [`uninstall-adguard.command`](./uninstall-adguard.command), then:
+
+```bash
+# strip the quarantine flag first
+xattr -d com.apple.quarantine ~/Downloads/uninstall-adguard.command
+
+# then just double-click it — macOS will prompt for your password
+```
+
+> If macOS still blocks it: right-click → **Open** → **Open**
+
+<br/>
 
 ---
 
-## Support
+## What gets removed
 
-This repository is not actively maintained and does not provide support of any kind. Issues, pull requests and all other forms of contribution or contact are disabled. If the script doesn't work for you, you are welcome to fork it and adapt it to your needs.
+| Location | Contents |
+|---|---|
+| `/Applications/Adguard.app` | Main application |
+| `/Library/LaunchDaemons/com.adguard.*` | PAC daemon · TUN helper · helper |
+| `TC3Q7MAJXF.com.adguard.mac` | System/network extension |
+| `~/Library/Group Containers/TC3Q7MAJXF.*` | All user data and settings |
+| `~/Library/Preferences/com.adguard.*` | Preferences (all user accounts) |
+| `~/Library/Caches/com.adguard.*` | Caches |
+| `~/Library/Saved Application State/com.adguard.*` | Saved state |
+| `/Library/Application Support/AdGuard Software/` | System-level app support |
+| `/Library/Logs/com.adguard.*` | Logs |
+| Browser `NativeMessagingHosts/` | Chrome · Brave · Edge · Firefox · Chromium |
+| `pkgutil` receipts | `com.adguard.*` |
+
+<br/>
+
+---
+
+## SIP
+
+No SIP changes required. The network extension is removed via `systemextensionsctl` using AdGuard's team ID (`TC3Q7MAJXF`). If it reports `waiting for user` after the script completes, a reboot will finish the job.
+
+---
+
+## Notes
+
+- Tested on **macOS Monterey 12** and later
+- Covers AdGuard for Mac **v2.14.2**, **v2.17.0**, **v2.18.0**
+- Runs against every local user account on the machine, not just the current one
+- If something fails mid-run (usually AdGuard still running in the background), reboot and run again
+
+---
+
+<div align="center">
+
+<sub>Personal hobby script · No support · No warranty · Not affiliated with AdGuard</sub>
+
+</div>
