@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Please read before proceeding
+    url: https://github.com/lalaRLH/AdGuard-Uninstaller-for-macOS-Macintosh-OS/blob/main/.github/CONTRIBUTING.md
+    about: This repository does not accept issues or support requests. Please review the contributing guidelines before continuing.
