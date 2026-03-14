@@ -1,3 +1,8 @@
+**A personal script for fully removing AdGuard from macOS.**  
+Shared publicly in case it saves someone else the time. Nothing more.
+
+</div>
+
 <br/>
 
 ![macOS](https://img.shields.io/badge/macOS-Monterey%2B-black?style=flat-square&logo=apple&logoColor=white)
@@ -7,10 +12,7 @@
 
 <br/>
 
-**A personal script for fully removing AdGuard from macOS.**  
-Shared publicly in case it saves someone else the time. Nothing more.
 
-</div>
 
 ---
 
