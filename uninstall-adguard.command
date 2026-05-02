@@ -1,75 +1,66 @@
-#!/bin/bash
-# uninstall-adguard.command
-# double-click to run — will ask for your password via gui prompt
+#!/usr/bin/env bash
 
+# ==========================================================
+# AdGuard for macOS - Advanced Uninstaller Script
+# Targets release: 2.18.0.2089-release
+# Use with caution. Execute with elevated permissions.
+# ==========================================================
+
+# Check if running with root privileges
 if [ "$EUID" -ne 0 ]; then
-    osascript -e "do shell script \"bash '$0'\" with administrator privileges"
-    exit
+  echo "[-] ERROR: Please run this script with sudo."
+  echo "    Usage: sudo bash uninstaller.sh"
+  exit 1
 fi
 
-REAL_USER="${SUDO_USER:-$(scutil <<< "show State:/Users/ConsoleUser" | awk '/Name :/ && !/loginwindow/ { print $3 }' | head -1)}"
+TARGET_USER="${SUDO_USER:-$(whoami)}"
+TARGET_HOME=$(eval echo "~$TARGET_USER")
 
-osascript -e 'display notification "Starting AdGuard removal..." with title "AdGuard Uninstaller"'
+# --- Kill Running Processes ---
+echo "[+] Terminating all active AdGuard processes..."
+pkill -9 -f "AdGuard" 2>/dev/null
+pkill -9 "AdGuard" 2>/dev/null
+pkill -9 "AdGuard Login Helper" 2>/dev/null
+pkill -9 "AdGuard Assistant" 2>/dev/null
+pkill -9 "com.adguard.mac.adguard.adguard-pac.daemon" 2>/dev/null
+pkill -9 "com.adguard.mac.adguard.adguard-tun-helper.daemon" 2>/dev/null
 
-pkill -x "Adguard" 2>/dev/null || true
-pkill -x "adguard-nm" 2>/dev/null || true
-sleep 1
+# --- Unload LaunchDaemons ---
+echo "[+] Unloading launchd automation entries..."
+[ -f "/Library/LaunchDaemons/com.adguard.mac.adguard.adguard-pac.daemon.plist" ] && launchctl unload "/Library/LaunchDaemons/com.adguard.mac.adguard.adguard-pac.daemon.plist" 2>/dev/null
+[ -f "/Library/LaunchDaemons/com.adguard.mac.adguard.adguard-tun-helper.daemon.plist" ] && launchctl unload "/Library/LaunchDaemons/com.adguard.mac.adguard.adguard-tun-helper.daemon.plist" 2>/dev/null
 
-for plist in \
-    "/Library/LaunchDaemons/com.adguard.mac.adguard.adguard-pac.daemon.plist" \
-    "/Library/LaunchDaemons/com.adguard.mac.adguard.adguard-tun-helper.daemon.plist" \
-    "/Library/LaunchDaemons/com.adguard.mac.adguard.helper.plist"; do
-    if [ -f "$plist" ]; then
-        launchctl bootout "system/$(basename $plist .plist)" 2>/dev/null || launchctl unload "$plist" 2>/dev/null || true
-    fi
-done
+# --- Remove App Bundle ---
+echo "[+] Erasing AdGuard App bundle..."
+rm -rf "/Applications/AdGuard.app" 2>/dev/null
 
-for ext in "com.adguard.mac.adguard.network-extension" "com.adguard.mac.adguard.tunnel"; do
-    systemextensionsctl list 2>/dev/null | grep -q "$ext" && \
-        systemextensionsctl uninstall TC3Q7MAJXF "$ext" 2>/dev/null || true
-    pluginkit -e ignore -i "$ext" 2>/dev/null || true
-done
+# --- Remove Application Support files ---
+echo "[+] Clearing config registries..."
+rm -rf "/Library/Application Support/AdGuard Software" 2>/dev/null
+rm -rf "$TARGET_HOME/Library/Application Support/com.adguard.mac.adguard" 2>/dev/null
+rm -rf "$TARGET_HOME/Library/Application Support/AdGuard" 2>/dev/null
+rm -rf "$TARGET_HOME/Library/Group Containers/TC3Q7MAJXF.com.adguard.mac" 2>/dev/null
+find "$TARGET_HOME/Library/Application Support" -name "com.adguard.browser_extension_host.nm.json" -delete 2>/dev/null
+find "$TARGET_HOME/Library/Application Support" -name "com.adguard.*" -delete 2>/dev/null
 
-rm -rf /Applications/Adguard.app
-rm -rf /Applications/AdGuard.app
+# --- Clear logs and caches ---
+echo "[+] Emptying log repositories and storage items..."
+rm -rf "/Library/Logs/com.adguard.mac.adguard" 2>/dev/null
+rm -rf "$TARGET_HOME/Library/Caches/com.adguard.mac.adguard" 2>/dev/null
+rm -f "$TARGET_HOME/Library/Preferences/com.adguard.mac.adguard.plist" 2>/dev/null
+rm -f "$TARGET_HOME/Library/Cookies/com.adguard.mac.adguard.binarycookies" 2>/dev/null
+rm -rf "$TARGET_HOME/Library/Saved Application State/com.adguard.mac.adguard.savedState" 2>/dev/null
 
-rm -f /Library/LaunchDaemons/com.adguard.mac.adguard.adguard-pac.daemon.plist
-rm -f /Library/LaunchDaemons/com.adguard.mac.adguard.adguard-tun-helper.daemon.plist
-rm -f /Library/LaunchDaemons/com.adguard.mac.adguard.helper.plist
+# --- Remove Root CA certificates ---
+echo "[+] Purging security certificate profiles from Keychain..."
+security delete-certificate -c "AdGuard Personal CA" /Library/Keychains/System.keychain 2>/dev/null
+security delete-certificate -c "AdGuard Personal CA" "$TARGET_HOME/Library/Keychains/login.keychain-db" 2>/dev/null
 
-rm -rf "/Library/Application Support/AdGuard Software/com.adguard.mac.adguard"
-rmdir "/Library/Application Support/AdGuard Software" 2>/dev/null || true
-rm -rf "/Library/Application Support/com.adguard.mac.adguard"
-rm -rf "/Library/Application Support/com.adguard.mac"
-rm -rf "/Library/Logs/com.adguard.mac.adguard"
+# --- Flush cached memory defaults ---
+echo "[+] Restarting cfprefsd process..."
+killall -u "$TARGET_USER" cfprefsd 2>/dev/null
 
-for home in $(find /Users -maxdepth 1 -mindepth 1 -type d ! -name Shared); do
-    rm -rf "$home/Library/Group Containers/TC3Q7MAJXF.com.adguard.mac"
-    rm -f  "$home/Library/Preferences/com.adguard.mac.adguard.plist"
-    rm -f  "$home/Library/Preferences/com.adguard.Adguard.plist"
-    rm -f  "$home/Library/Preferences/TC3Q7MAJXF.com.adguard.mac.plist"
-    rm -rf "$home/Library/Application Support/com.adguard.mac.adguard"
-    rm -rf "$home/Library/Caches/com.adguard.mac.adguard"
-    rm -rf "$home/Library/Caches/TC3Q7MAJXF.com.adguard.mac"
-    rm -rf "$home/Library/Saved Application State/com.adguard.mac.adguard.savedState"
-
-    for nm_dir in \
-        "$home/Library/Application Support/Google/Chrome/NativeMessagingHosts" \
-        "$home/Library/Application Support/BraveSoftware/Brave-Browser/NativeMessagingHosts" \
-        "$home/Library/Application Support/Microsoft Edge/NativeMessagingHosts" \
-        "$home/Library/Application Support/Chromium/NativeMessagingHosts"; do
-        rm -f "$nm_dir/com.adguard.browser_extension_host.nm.json" 2>/dev/null || true
-    done
-
-    for profile in $(find "$home/Library/Application Support/Firefox/Profiles" -maxdepth 1 -mindepth 1 -type d 2>/dev/null); do
-        rm -f "$profile/native-messaging-hosts/com.adguard.browser_extension_host.nm.json"
-    done
-done
-
-pkgutil --pkgs 2>/dev/null | grep -i adguard | while read receipt; do
-    pkgutil --forget "$receipt" 2>/dev/null || true
-done
-
-pkill -u "$REAL_USER" -x cfprefsd 2>/dev/null || true
-
-osascript -e 'display alert "AdGuard removed" message "All done. You can delete this file now."'
+# --- Reboot Machine ---
+echo "[+] Uninstallation clean! Restarting OS..."
+sync
+shutdown -r now "AdGuard uninstalled successfully."
