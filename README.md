@@ -10,17 +10,6 @@ Shared publicly in case it saves someone else the time. Nothing more.
 ![Version](https://img.shields.io/badge/Tested-v2.14%20·%20v2.17%20·%20v2.18-blue?style=flat-square&color=0a84ff)
 ![Support](https://img.shields.io/badge/Support-None-critical?style=flat-square&color=ff453a)
 
-<br/>
-
-
-
----
-
-## Disclaimer
-
-> This script is provided **"as is"** without warranty of any kind. The author accepts no responsibility for data loss, system damage or any other consequence arising from its use. It runs with administrator privileges and removes files permanently. **Review it before running it. Use entirely at your own risk.**
-
----
 
 ## Usage
 
@@ -171,6 +160,18 @@ No SIP changes required. The network extension is removed via `systemextensionsc
 - Covers AdGuard for Mac **v2.14.2**, **v2.17.0**, **v2.18.0**
 - Runs against every local user account on the machine, not just the current one
 - If something fails mid-run (usually AdGuard still running in the background), reboot and run again
+
+---
+
+<br/>
+
+
+
+---
+
+## Disclaimer
+
+> This script is provided **"as is"** without warranty of any kind. The author accepts no responsibility for data loss, system damage or any other consequence arising from its use. It runs with administrator privileges and removes files permanently. **Review it before running it. Use entirely at your own risk.**
 
 ---
 
