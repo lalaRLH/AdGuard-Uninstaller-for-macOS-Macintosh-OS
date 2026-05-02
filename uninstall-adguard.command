@@ -13,6 +13,35 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
+# ==========================================================
+# WARNING
+# ==========================================================
+
+echo ""
+echo "  This script will reboot your Mac. No warning. No countdown."
+echo "  It just does it."
+echo ""
+echo "  Save your files. Close your stuff. Then press RETURN."
+echo ""
+read -r -p "  → Press RETURN if you understand: "
+
+echo ""
+echo "  Type YES to confirm you saved everything."
+echo "  If you lose your work, that's on you."
+echo "  This script told you. Twice."
+echo ""
+read -r -p "  → Type YES: " CONFIRM
+
+if [ "$CONFIRM" != "YES" ]; then
+  echo ""
+  echo "  Go save your files."
+  echo ""
+  exit 0
+fi
+
+echo ""
+# ==========================================================
+
 TARGET_USER="${SUDO_USER:-$(whoami)}"
 TARGET_HOME=$(eval echo "~$TARGET_USER")
 
