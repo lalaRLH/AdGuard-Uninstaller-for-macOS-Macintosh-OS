@@ -23,14 +23,14 @@ echo "  It just does it."
 echo ""
 echo "  Save your files. Close your stuff. Then press RETURN."
 echo ""
-read -r -p "  → Press RETURN if you understand: "
+read -r -p "  → Press RETURN if you understand: " < /dev/tty
 
 echo ""
 echo "  Type YES to confirm you saved everything."
 echo "  If you lose your work, that's on you."
 echo "  This script told you. Twice."
 echo ""
-read -r -p "  → Type YES: " CONFIRM
+read -r -p "  → Type YES: " CONFIRM < /dev/tty
 
 if [ "$CONFIRM" != "YES" ]; then
   echo ""
