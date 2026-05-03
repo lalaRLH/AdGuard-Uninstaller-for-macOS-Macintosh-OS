@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 # ==========================================================
-# AdGuard for macOS - Advanced Uninstaller
-# Includes optional data backup. Automatic reboot.
+# ADGUARD ADVANCED UNINSTALLER
+# Optional backup of user data. Automatic reboot.
 # Targets: 2.18.0.2089-release
 # ==========================================================
 
@@ -41,7 +41,7 @@ abort_before_changes() {
 }
 
 # ==========================================================
-# Blunt Warning + Confirmation (12-second timer)
+# Confirmation + Backup + Countdown
 # ==========================================================
 
 confirm_reboot_warning() {
@@ -67,24 +67,13 @@ confirm_reboot_warning() {
     abort_before_changes "Confirmation phrase did not match." 0
   fi
 
-  tty_line ""
-  tty_line "${YELLOW}Proceeding. Reboot in 12 seconds.${NC}"
-  sleep 0.8
-
-  for s in 12 11 10 9 8 7 6 5 4 3 2 1; do
-    tty_write "\r${YELLOW}Restarting in ${s} seconds...${NC}   "
-    sleep 1
-  done
-
-  tty_line "\n\n${RED}Restart initiated.${NC}"
-  sleep 0.6
   trap - INT TERM
 }
 
 confirm_reboot_warning
 
 # ==========================================================
-# Backup Option
+# Backup Option (now before countdown)
 # ==========================================================
 
 BACKUP_DIR=""
@@ -122,6 +111,31 @@ EOF
 else
     tty_line "${YELLOW}No backup created.${NC}"
 fi
+
+# ==========================================================
+# Final Warning + Countdown
+# ==========================================================
+
+tty_line ""
+tty_line "${RED}${BOLD}Last chance.${NC}"
+tty_line "The next step will uninstall AdGuard and reboot immediately."
+tty_line "Press Ctrl+C now if you want to stop."
+tty_line ""
+sleep 1.5
+
+trap 'abort_before_changes "Cancelled by user." 130' INT TERM
+
+tty_line "${YELLOW}Starting 12-second countdown.${NC}"
+sleep 0.8
+
+for s in 12 11 10 9 8 7 6 5 4 3 2 1; do
+    tty_write "\r${YELLOW}Restarting in ${s} seconds...${NC}   "
+    sleep 1
+done
+
+tty_line "\n\n${RED}Restart initiated.${NC}"
+sleep 0.6
+trap - INT TERM
 
 # ==========================================================
 # Uninstall
