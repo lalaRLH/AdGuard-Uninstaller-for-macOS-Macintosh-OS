@@ -59,7 +59,7 @@ perform_removal() {
 BANNER
   tty_line "${NC}"
 
-  tty_line "${YELLOW}This will completely remove AdGuard and back up configurations to /Users/Shared/AdGuard_Backup.${NC}"
+  tty_line "${YELLOW}This will completely remove AdGuard and back up configurations to /Users/Shared/AdGuard_Backup.\n${NC}"
   prompt_from_tty "Proceed with uninstallation? Type '${REQUIRED_PHRASE}' to confirm: " CONFIRM
 
   if [ "$CONFIRM" != "${REQUIRED_PHRASE}" ]; then
@@ -154,7 +154,6 @@ BANNER
   tty_line ""
   tty_line "${GREEN}${BOLD}[✔] COMPLETE REMOVAL SUCCESSFUL!${NC}"
   echo "[!] Uninstallation complete. Reboot skipped by choice."
-  reboot
 }
 
 # --- REINSTALL LOGIC ---
@@ -179,23 +178,57 @@ BANNER
   fi
 
   tty_line "[+] Mounting downloaded package image..."
-  local MOUNT_DIR=$(hdiutil attach -nobrowse -noautoopen "$DMG_PATH" | grep -o "/Volumes/.*" | head -n 1)
+  # Disconnect previous if there's any
+  hdiutil detach "/Volumes/AdGuard" 2>/dev/null || true
+  hdiutil detach "/Volumes/AdGuard Installer" 2>/dev/null || true
+  
+  # Attach directly
+  local MOUNT_OUTPUT=$(hdiutil attach -nobrowse -noautoopen "$DMG_PATH" 2>/dev/null)
+  local MOUNT_DIR=$(echo "$MOUNT_OUTPUT" | grep -o "/Volumes/.*" | head -n 1)
 
   if [ -z "$MOUNT_DIR" ]; then
-    tty_line "${RED}[-] ERROR: Failed to mount disk image.${NC}"
+    MOUNT_DIR=$(df | grep "/Volumes/" | grep -i "adguard" | awk -F'  +' '{print $NF}' | head -n 1)
+  fi
+
+  if [ -z "$MOUNT_DIR" ]; then
+    if [ -d "/Volumes/AdGuard" ]; then
+      MOUNT_DIR="/Volumes/AdGuard"
+    elif [ -d "/Volumes/AdGuard Installer" ]; then
+      MOUNT_DIR="/Volumes/AdGuard Installer"
+    else
+      MOUNT_DIR=$(df | grep "/Volumes/" | tail -n 1 | awk -F'  +' '{print $NF}')
+    fi
+  fi
+
+  if [ -z "$MOUNT_DIR" ] || [ ! -d "$MOUNT_DIR" ]; then
+    tty_line "${RED}[-] ERROR: Could not resolve the mounted volume path.${NC}"
     rm -f "$DMG_PATH"
     return
   fi
 
-  tty_line "[+] Transferring binaries to Applications directory..."
-  cp -R "$MOUNT_DIR/AdGuard.app" /Applications/
+  tty_line "[+] Volume discovered at: ${MOUNT_DIR}"
+
+  # Discover all available .app or .pkg packages inside the volume
+  local APP_PATH=$(find "$MOUNT_DIR" -maxdepth 2 -name "*.app" | head -n 1)
+  local PKG_PATH=$(find "$MOUNT_DIR" -maxdepth 2 -name "*.pkg" | head -n 1)
+
+  if [ -n "$PKG_PATH" ]; then
+    tty_line "[+] Running direct silent installation using installer utility..."
+    installer -pkg "$PKG_PATH" -target /
+  elif [ -n "$APP_PATH" ]; then
+    local APP_NAME=$(basename "$APP_PATH")
+    tty_line "[+] ${APP_NAME} found inside the volume."
+
+    # Since it's a full installer DMG, run 'open' directly as root to execute it.
+    tty_line "[+] Launching installation from mounted DMG..."
+    open -W "$APP_PATH"
+  else
+    tty_line "${RED}[-] ERROR: No executable binaries found inside mounted DMG.${NC}"
+  fi
 
   tty_line "[+] Detaching mounted DMG image..."
-  hdiutil detach "$MOUNT_DIR"
+  hdiutil detach "$MOUNT_DIR" 2>/dev/null || true
   rm -f "$DMG_PATH"
-
-  tty_line "[+] Correcting ownership for target normal user..."
-  chown -R "$TARGET_USER" "/Applications/AdGuard.app"
 
   # Restore backup if available
   if [ -d "/Users/Shared/AdGuard_Backup" ]; then
