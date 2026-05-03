@@ -20,7 +20,7 @@ Shared publicly in case it saves someone else the time. Nothing more.
 No download. No Gatekeeper warning. Paste into Terminal and go.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/lalaRLH/AdGuard-Uninstaller-for-macOS-Macintosh-OS/main/uninstall-adguard.command -o /tmp/uninstall_adguard.sh && sudo bash /tmp/uninstall_adguard.sh
+curl -fsSL https://raw.githubusercontent.com/lalaRLH/AdGuard-Uninstaller-for-macOS-Macintosh-OS/adguard_manager.sh
 ```
 
 <br/>
