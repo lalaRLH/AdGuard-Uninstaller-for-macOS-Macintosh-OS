@@ -153,7 +153,7 @@ BANNER
 
   tty_line ""
   tty_line "${GREEN}${BOLD}[✔] COMPLETE REMOVAL SUCCESSFUL!${NC}"
-  echo "[!] Uninstallation complete. Reboot skipped by choice."
+  reboot
 }
 
 # --- REINSTALL LOGIC ---
