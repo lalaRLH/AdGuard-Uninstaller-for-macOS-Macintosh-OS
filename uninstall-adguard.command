@@ -99,11 +99,75 @@ APPLESCRIPT
 }
 
 # ==========================================================
-# WARNING SKIPPED
+# WARNING & SAFETY COMPLIANCE
 # ==========================================================
-tty_line "${YELLOW}${BOLD}Warning banner skipped by configuration.${NC}"
-tty_line "${BLUE}[+] Commencing removal of AdGuard for macOS...${NC}"
-sleep 1
+
+confirm_reboot_warning() {
+  local REQUIRED_PHRASE="I SAVED MY FILES AND ACCEPT THE REBOOT"
+  local CONFIRM
+  local seconds
+
+  trap 'abort_before_changes "Interrupted before removal." 130' INT TERM
+
+  printf '\033[2J\033[H\033[?25l' > "$TTY_DEVICE"
+  tty_line "${RED}${BOLD}"
+  cat > "$TTY_DEVICE" <<'BANNER'
+######################################################################
+#                                                                    #
+#                      STOP. SAVE YOUR FILES.                        #
+#                                                                    #
+#        THIS SCRIPT WILL REBOOT THIS MAC WHEN IT FINISHES.          #
+#                                                                    #
+######################################################################
+BANNER
+  tty_line "${NC}"
+
+  slow_type_line "This script is about to remove AdGuard for macOS completely."
+  slow_type_line "At the end, macOS reboots immediately. No bonus question. No dramatic second chance."
+  slow_type_line "Unsaved work is not coming along for the ride."
+  slow_type_line "If anything has a tiny unsaved dot, go deal with it now."
+  tty_line ""
+  tty_line "${BOLD}Target user:${NC} $TARGET_USER ($TARGET_HOME)"
+  tty_line "${BOLD}Reboot behavior:${NC} shutdown -r now, after cleanup completes"
+  tty_line ""
+
+  show_native_warning
+
+  tty_line "${YELLOW}${BOLD}Mandatory reading pause.${NC}"
+  tty_line "${DIM}This is the speed bump. It is here because reboots and unsaved work are a tragic little sitcom.${NC}"
+  tty_line ""
+
+  for seconds in 5 4 3 2 1; do
+    tty_write "\r  Confirmation unlocks in ${BOLD}${seconds}${NC} seconds. Read the warning, not your phone. "
+    sleep 1
+  done
+  tty_line ""
+  tty_line ""
+
+  cleanup_prompt_ui
+  tty_line "${RED}${BOLD}FINAL CONFIRMATION${NC}"
+  tty_line "Type this exact sentence to continue:"
+  tty_line ""
+  tty_line "  ${BOLD}${REQUIRED_PHRASE}${NC}"
+  tty_line ""
+
+  if ! prompt_from_tty "  > " CONFIRM; then
+    abort_before_changes "Could not read confirmation from the terminal." 1
+  fi
+
+  if [ "$CONFIRM" != "$REQUIRED_PHRASE" ]; then
+    abort_before_changes "Confirmation did not match exactly." 0
+  fi
+
+  tty_line ""
+  tty_line "${GREEN}${BOLD}Confirmed.${NC} Starting removal. The reboot happens at the end."
+  tty_line ""
+  sleep 1
+
+  trap - INT TERM
+}
+
+confirm_reboot_warning
 
 # ==========================================================
 # REMOVAL PHASE
@@ -200,6 +264,18 @@ rm -f "$TARGET_HOME/Library/LaunchAgents/com.adguard.mac.adguard.loginhelper.pli
 rm -f "$TARGET_HOME/Library/LaunchAgents/com.adguard.mac.adguard.mac.update.plist" 2>/dev/null
 rm -f "/Library/LaunchDaemons/com.adguard.mac.adguard.adguard-pac.daemon.plist" 2>/dev/null
 rm -f "/Library/LaunchDaemons/com.adguard.mac.adguard.adguard-tun-helper.daemon.plist" 2>/dev/null
+
+# --- NUCLEAR MODE: Extra Cache and Settings Cleanup ---
+echo "[+] NUCLEAR MODE: Purging additional sandboxed containers and webkits..."
+rm -rf "$TARGET_HOME/Library/Containers/com.adguard.mac.adguard.network-extension" 2>/dev/null
+rm -rf "$TARGET_HOME/Library/Containers/com.adguard.mac.adguard.adguard-pac" 2>/dev/null
+rm -rf "$TARGET_HOME/Library/Containers/com.adguard.mac.adguard.adguard-tun-helper" 2>/dev/null
+rm -rf "$TARGET_HOME/Library/WebKit/com.adguard.mac.adguard" 2>/dev/null
+rm -rf "$TARGET_HOME/Library/HTTPStorages/com.adguard.mac.adguard" 2>/dev/null
+rm -rf "$TARGET_HOME/Library/HTTPStorages/com.adguard.mac.adguard.binarycookies" 2>/dev/null
+rm -rf "$TARGET_HOME/Library/Logs/AdGuard" 2>/dev/null
+# Clean Safari/App Store extension residual files if any
+rm -rf "$TARGET_HOME/Library/Containers/com.adguard.mac.adguard" 2>/dev/null
 
 # --- Remove Root CA certificates ---
 echo "[+] Purging AdGuard security certificate profiles from Keychain..."
